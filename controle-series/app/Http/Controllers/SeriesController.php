@@ -24,32 +24,38 @@ class SeriesController extends Controller
         return view('series.create');
     }
 
-    public function store(SeriesFormRequest $request) {
-
-        $serie = Series::create($request->all());
-        $seasons = [];
-        for ($i = 1; $i <= $request->seasonsQty; $i++){
-            $seasons[] = [
-                'series_id' => $serie->id,
-                'number' => $i
-            ];
-        }
-        Season::insert($seasons);
-
-        $episodes = [];
-        foreach($serie->seasons as $season){
-            for ($j = 1; $j <= $request->episodesPerSeason; $j++){
-                $episodes[] = [
-                    'season_id' => $season->id,
-                    'number' => $j
+    public function store(SeriesFormRequest $request)
+    {
+        $serie = DB::transaction(function() use ($request){
+            $serie = Series::create($request->all());
+            $seasons = [];
+            for ($i = 1; $i <= $request->seasonsQty; $i++){
+                $seasons[] = [
+                    'series_id' => $serie->id,
+                    'number' => $i
                 ];
             }
-        }
-        Episode::insert($episodes);
+            Season::insert($seasons);
+    
+            $episodes = [];
+            foreach($serie->seasons as $season){
+                for ($j = 1; $j <= $request->episodesPerSeason; $j++){
+                    $episodes[] = [
+                        'season_id' => $season->id,
+                        'number' => $j
+                    ];
+                }
+            }
+            Episode::insert($episodes);
+    
+            //$request->session()->flash('mensagem.sucesso', "Série {$serie->nome} adicionada com sucesso");
+    
+            //DB::insert('INSERT INTO series (nome) VALUES (?)', [$nomeSerie]);
 
-        //$request->session()->flash('mensagem.sucesso', "Série {$serie->nome} adicionada com sucesso");
+            return $serie;
+        });
 
-        //DB::insert('INSERT INTO series (nome) VALUES (?)', [$nomeSerie]);
+        assert($serie !== null);
         return to_route('series.index')->with('mensagem.sucesso', "Série {$serie->nome} adicionada com sucesso");
 
     }
