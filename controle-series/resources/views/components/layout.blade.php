@@ -12,14 +12,14 @@
     <div class="container-fluid">
       <a href="{{ route('series.index') }}" class="navbar-brand">Séries</a>
       @auth
-         <a href="{{ route('logout') }}">Sair</a>
+        <form action="{{ route('logout') }}" method="post">
+          @csrf
+          <button class="btn btn-link">Sair</button>
+        </form>
       @endauth
-        @if (Route::currentRouteName() !== 'login' && Auth::guest())
-          <a href="{{ route('login') }}">Entrar</a>
-        @endif
-      @guest
-
-      @endguest
+      @if (Route::currentRouteName() !== 'login' && Auth::guest())
+        <a href="{{ route('login') }}">Entrar</a>
+      @endif
     </div>
   </nav>
   <div class="container">
