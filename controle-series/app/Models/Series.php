@@ -22,5 +22,11 @@ class Series extends Model
         self::addGlobalScope('ordered', function (Builder $queryBuilder) {
             $queryBuilder->orderBy('Nome');
         });
+
+        static::deleting(function ($serie) {
+        if ($serie->cover && \Illuminate\Support\Facades\Storage::disk('public')->exists($serie->cover)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($serie->cover);
+        }
+    });
     }
 }
